@@ -1,6 +1,6 @@
 # LifeSync
 
-**TSA High School Software Development, 2026–27.** Theme: _improve how people learn, teach,
+**TSA High School Software Development, 2026–27 · Team 1.** Theme: _improve how people learn, teach,
 practice, or develop new skills._
 
 LifeSync helps learners on the autism spectrum close the **generalization gap**: the distance
@@ -11,14 +11,14 @@ calm-down break. Then real-world check-ins show whether the skill actually trans
 
 ## Project documents
 
-| Document                                               | Contents                                                                        |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| [Requirements](docs/REQUIREMENTS.md)                   | Problem, theme alignment, users, numbered requirements traced to code and tests |
-| [Design](docs/DESIGN.md)                               | Architecture, data model, session state machine, algorithms, design decisions   |
-| [Testing](docs/TESTING.md)                             | Test strategy, automated results, manual test cases                             |
-| [Requirements and design note (PDF)](docs/submission/) | One-page Tier 1 note                                                            |
-| [Demo script](docs/DEMO-SCRIPT.md)                     | Script for the screen recording                                                 |
-| [Plan](PLAN.md)                                        | Build history and roadmap                                                       |
+| Document                                                                                                           | Contents                                                                        |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| [Requirements](docs/REQUIREMENTS.md)                                                                               | Problem, theme alignment, users, numbered requirements traced to code and tests |
+| [Design](docs/DESIGN.md)                                                                                           | Architecture, data model, session state machine, algorithms, design decisions   |
+| [Testing](docs/TESTING.md)                                                                                         | Test strategy, automated results, manual test cases                             |
+| [Requirements and design note (PDF)](docs/submission/SoftwareDevelopment_Team1_Tier1_Requirements-Design-Note.pdf) | One-page Tier 1 note                                                            |
+| [Demo script](docs/DEMO-SCRIPT.md)                                                                                 | Script for the screen recording                                                 |
+| [Plan](PLAN.md)                                                                                                    | Build history and roadmap                                                       |
 
 ## Run it
 
