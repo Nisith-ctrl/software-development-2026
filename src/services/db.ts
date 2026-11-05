@@ -17,8 +17,19 @@ function openDb(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains(STATE_STORE)) db.createObjectStore(STATE_STORE);
         if (!db.objectStoreNames.contains(MEDIA_STORE)) db.createObjectStore(MEDIA_STORE);
       };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        const db = req.result;
+        // Let another tab upgrade or delete the database instead of blocking it forever.
+        db.onversionchange = () => {
+          db.close();
+          dbPromise = null;
+        };
+        resolve(db);
+      };
+      req.onerror = () => {
+        dbPromise = null;
+        reject(req.error);
+      };
     });
   }
   return dbPromise;
@@ -34,7 +45,7 @@ async function run<T>(store: string, mode: IDBTransactionMode, fn: (s: IDBObject
   });
 }
 
-export const loadState = <T>() => run<T | undefined>(STATE_STORE, 'readonly', (s) => s.get(STATE_KEY));
+export const loadState = () => run<unknown>(STATE_STORE, 'readonly', (s) => s.get(STATE_KEY));
 export const saveState = <T>(value: T) => run(STATE_STORE, 'readwrite', (s) => s.put(value, STATE_KEY));
 
 export const putMedia = (id: string, blob: Blob) => run(MEDIA_STORE, 'readwrite', (s) => s.put(blob, id));

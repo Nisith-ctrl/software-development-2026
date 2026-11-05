@@ -1,4 +1,4 @@
-import { useHeartRate } from '../../lib/heartRate';
+import { useHeartRate } from '../../services/heartRate';
 
 export function Wearable() {
   const hr = useHeartRate();
@@ -12,7 +12,9 @@ export function Wearable() {
 
       <section className="card hr-status">
         <div className="hr-reading" aria-live="polite">
-          <span className="hr-heart" aria-hidden>♥</span>
+          <span className="hr-heart" aria-hidden>
+            ♥
+          </span>
           <span className="hr-bpm">{hr.bpm ?? '--'}</span>
           <span className="muted">bpm</span>
         </div>
@@ -25,13 +27,19 @@ export function Wearable() {
           <button type="button" onClick={hr.connectBluetooth} disabled={!hr.bluetoothSupported}>
             Connect Bluetooth heart-rate device
           </button>
-          <button type="button" className="secondary" onClick={hr.startSimulator}>Use simulator</button>
+          <button type="button" className="secondary" onClick={hr.startSimulator}>
+            Use simulator
+          </button>
           {hr.source !== 'none' && (
-            <button type="button" className="secondary" onClick={hr.disconnect}>Disconnect</button>
+            <button type="button" className="secondary" onClick={hr.disconnect}>
+              Disconnect
+            </button>
           )}
         </div>
         {!hr.bluetoothSupported && (
-          <p className="muted small">This browser doesn't support Web Bluetooth. Chrome or Edge on desktop or Android do.</p>
+          <p className="muted small">
+            This browser doesn't support Web Bluetooth. Chrome or Edge on desktop or Android do.
+          </p>
         )}
       </section>
 
@@ -40,11 +48,17 @@ export function Wearable() {
           <h2>Simulator</h2>
           <label className="field">
             Target heart rate: {hr.simTarget} bpm
-            <input type="range" min={60} max={150} value={hr.simTarget} onChange={(e) => hr.setSimTarget(Number(e.target.value))} />
+            <input
+              type="range"
+              min={60}
+              max={150}
+              value={hr.simTarget}
+              onChange={(e) => hr.setSimTarget(Number(e.target.value))}
+            />
           </label>
           <p className="muted small">
-            During a routine a ♥ button sits in the bottom corner so you can raise the heart rate and watch the calm screen
-            take over.
+            During a routine a ♥ button sits in the bottom corner so you can raise the heart rate and watch the calm
+            screen take over.
           </p>
         </section>
       )}
@@ -52,9 +66,14 @@ export function Wearable() {
       <section className="card">
         <h2>Which devices work?</h2>
         <ul className="steps-list">
-          <li>Chest straps and arm bands that use the standard Bluetooth heart-rate profile (Polar, Wahoo, Garmin HRM and similar).</li>
+          <li>
+            Chest straps and arm bands that use the standard Bluetooth heart-rate profile (Polar, Wahoo, Garmin HRM and
+            similar).
+          </li>
           <li>Watches with a "broadcast heart rate" mode, such as many Garmin and some Wear OS watches.</li>
-          <li>Apple Watch and Fitbit don't broadcast to browsers. They need a companion app, which is on the roadmap.</li>
+          <li>
+            Apple Watch and Fitbit don't broadcast to browsers. They need a companion app, which is on the roadmap.
+          </li>
         </ul>
       </section>
     </>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useStore } from '../lib/store';
+import { useStore } from '../state/store';
 
 export function Home() {
   const { data } = useStore();
@@ -19,7 +19,9 @@ export function Home() {
       <div className="learner-tiles">
         {data.learners.map((l) => (
           <Link key={l.id} to={`/learn/${l.id}`} className="learner-tile">
-            <span className="learner-avatar" aria-hidden>{l.avatar}</span>
+            <span className="learner-avatar" aria-hidden>
+              {l.avatar}
+            </span>
             <span className="learner-name">{l.name}</span>
           </Link>
         ))}

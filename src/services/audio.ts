@@ -1,10 +1,11 @@
 // Sounds are synthesised so the app ships no audio files and volume stays gentle.
 
 let ctx: AudioContext | null = null;
-const audio = () => (ctx ??= new AudioContext());
+const audio = () => (typeof AudioContext === 'undefined' ? null : (ctx ??= new AudioContext()));
 
 export function playChime() {
   const ac = audio();
+  if (!ac) return;
   const now = ac.currentTime;
   [660, 990].forEach((freq, i) => {
     const osc = ac.createOscillator();
@@ -23,6 +24,7 @@ export function playChime() {
 /** Soft, slowly swelling chord. Returns a stop function. */
 export function startCalmMusic(): () => void {
   const ac = audio();
+  if (!ac) return () => undefined;
   const master = ac.createGain();
   master.gain.value = 0;
   master.gain.linearRampToValueAtTime(0.08, ac.currentTime + 3);
@@ -55,7 +57,7 @@ export function startCalmMusic(): () => void {
 }
 
 export function speak(text: string) {
-  if (!('speechSynthesis' in window)) return;
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 0.85;

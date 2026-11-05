@@ -5,6 +5,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'node',
+    environment: 'jsdom',
+    restoreMocks: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/domain/**', 'src/pages/Player.tsx'],
+      exclude: ['**/*.test.*', 'src/domain/testData.ts'],
+      reporter: ['text', 'html'],
+    },
   },
 });

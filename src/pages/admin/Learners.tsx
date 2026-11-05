@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { newId } from '../../lib/id';
-import { useStore } from '../../lib/store';
-import type { CalmTool, Learner, RewardStyle } from '../../lib/types';
+import { newId } from '../../domain/id';
+import { validateLearner } from '../../domain/validation';
+import { useStore } from '../../state/store';
+import type { CalmTool, Learner, RewardStyle } from '../../domain/types';
 
 export function LearnerList() {
   const { data } = useStore();
@@ -10,16 +11,21 @@ export function LearnerList() {
     <>
       <div className="page-head">
         <h1>Learners</h1>
-        <Link className="button" to="/admin/learners/new">Add learner</Link>
+        <Link className="button" to="/admin/learners/new">
+          Add learner
+        </Link>
       </div>
       <div className="list">
         {data.learners.map((l) => (
           <Link key={l.id} className="list-row" to={`/admin/learners/${l.id}`}>
-            <span className="list-emoji" aria-hidden>{l.avatar}</span>
+            <span className="list-emoji" aria-hidden>
+              {l.avatar}
+            </span>
             <span className="list-main">
               <strong>{l.name}</strong>
               <span className="muted small">
-                Calm screen at {l.hrThreshold} bpm · {data.routines.filter((r) => r.assignedTo.includes(l.id)).length} routines
+                Calm screen at {l.hrThreshold} bpm · {data.routines.filter((r) => r.assignedTo.includes(l.id)).length}{' '}
+                routines
               </span>
             </span>
             <span aria-hidden>›</span>
@@ -53,18 +59,26 @@ export function LearnerEdit() {
   const { data, saveLearner, deleteLearner } = useStore();
   const existing = data.learners.find((l) => l.id === learnerId);
   const [form, setForm] = useState<Learner>(existing ?? blankLearner());
+  const [errors, setErrors] = useState<string[]>([]);
   const isNew = !existing;
 
   const set = <K extends keyof Learner>(key: K, value: Learner[K]) => setForm((f) => ({ ...f, [key]: value }));
   const toggleTool = (tool: CalmTool) =>
-    set('calmTools', form.calmTools.includes(tool) ? form.calmTools.filter((t) => t !== tool) : [...form.calmTools, tool]);
+    set(
+      'calmTools',
+      form.calmTools.includes(tool) ? form.calmTools.filter((t) => t !== tool) : [...form.calmTools, tool],
+    );
 
   return (
     <form
       className="form"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        saveLearner({ ...form, name: form.name.trim() || 'Learner' });
+        const problems = validateLearner(form);
+        setErrors(problems);
+        if (problems.length) return;
+        saveLearner({ ...form, name: form.name.trim() });
         navigate('/admin/learners');
       }}
     >
@@ -80,7 +94,9 @@ export function LearnerEdit() {
           <legend>Picture</legend>
           <div className="emoji-picker">
             {AVATARS.map((a) => (
-              <button key={a} type="button" aria-pressed={form.avatar === a} onClick={() => set('avatar', a)}>{a}</button>
+              <button key={a} type="button" aria-pressed={form.avatar === a} onClick={() => set('avatar', a)}>
+                {a}
+              </button>
             ))}
           </div>
         </fieldset>
@@ -102,8 +118,15 @@ export function LearnerEdit() {
             ] as Array<[RewardStyle, string, string]>
           ).map(([value, label, hint]) => (
             <label key={value} className="radio">
-              <input type="radio" name="reward" checked={form.rewardStyle === value} onChange={() => set('rewardStyle', value)} />
-              <span><strong>{label}</strong> <span className="muted small">{hint}</span></span>
+              <input
+                type="radio"
+                name="reward"
+                checked={form.rewardStyle === value}
+                onChange={() => set('rewardStyle', value)}
+              />
+              <span>
+                <strong>{label}</strong> <span className="muted small">{hint}</span>
+              </span>
             </label>
           ))}
         </fieldset>
@@ -116,7 +139,13 @@ export function LearnerEdit() {
         {form.rewardStyle === 'tokens' && (
           <label className="field short">
             Tokens on the board
-            <input type="number" min={2} max={10} value={form.tokensPerReward} onChange={(e) => set('tokensPerReward', Number(e.target.value))} />
+            <input
+              type="number"
+              min={2}
+              max={10}
+              value={form.tokensPerReward}
+              onChange={(e) => set('tokensPerReward', Number(e.target.value))}
+            />
           </label>
         )}
       </section>
@@ -141,25 +170,57 @@ export function LearnerEdit() {
         <div className="field-row">
           <label className="field short">
             Open calm screen at (bpm)
-            <input type="number" min={70} max={200} value={form.hrThreshold} onChange={(e) => set('hrThreshold', Number(e.target.value))} />
+            <input
+              type="number"
+              min={70}
+              max={200}
+              value={form.hrThreshold}
+              onChange={(e) => set('hrThreshold', Number(e.target.value))}
+            />
           </label>
           <label className="field short">
             …after it stays high for (seconds)
-            <input type="number" min={1} max={60} value={form.hrSustainSeconds} onChange={(e) => set('hrSustainSeconds', Number(e.target.value))} />
+            <input
+              type="number"
+              min={1}
+              max={60}
+              value={form.hrSustainSeconds}
+              onChange={(e) => set('hrSustainSeconds', Number(e.target.value))}
+            />
           </label>
           <label className="field short">
             Minimum break (seconds)
-            <input type="number" min={0} max={600} value={form.calmMinSeconds} onChange={(e) => set('calmMinSeconds', Number(e.target.value))} />
+            <input
+              type="number"
+              min={0}
+              max={600}
+              value={form.calmMinSeconds}
+              onChange={(e) => set('calmMinSeconds', Number(e.target.value))}
+            />
           </label>
         </div>
         <p className="muted small">
-          Tip: set the threshold about 20–30 bpm above the learner's resting heart rate, then adjust from the calm-break data.
+          Tip: set the threshold about 20–30 bpm above the learner's resting heart rate, then adjust from the calm-break
+          data.
         </p>
       </section>
 
+      {errors.length > 0 && (
+        <div className="card error-box" role="alert">
+          <strong>Fix these before saving:</strong>
+          <ul>
+            {errors.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="row">
         <button type="submit">Save</button>
-        <Link className="button secondary" to="/admin/learners">Cancel</Link>
+        <Link className="button secondary" to="/admin/learners">
+          Cancel
+        </Link>
         {!isNew && (
           <button
             type="button"

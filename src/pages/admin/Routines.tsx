@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { MediaView } from '../../components/MediaView';
-import { deleteMedia, putMedia } from '../../lib/db';
-import { newId } from '../../lib/id';
-import { useStore } from '../../lib/store';
-import type { Choice, Routine, RoutineCategory, Step } from '../../lib/types';
-import { CATEGORY_LABELS } from '../../lib/types';
+import { deleteMedia, putMedia } from '../../services/db';
+import { newId } from '../../domain/id';
+import { validateRoutine } from '../../domain/validation';
+import { useStore } from '../../state/store';
+import type { Choice, Routine, RoutineCategory, Step } from '../../domain/types';
+import { CATEGORY_LABELS } from '../../domain/types';
 
 const MAX_MEDIA_MB = 50;
 
@@ -15,17 +16,24 @@ export function RoutineList() {
     <>
       <div className="page-head">
         <h1>Routines</h1>
-        <Link className="button" to="/admin/routines/new">New routine</Link>
+        <Link className="button" to="/admin/routines/new">
+          New routine
+        </Link>
       </div>
       <div className="list">
         {data.routines.map((r) => (
           <Link key={r.id} className="list-row" to={`/admin/routines/${r.id}`}>
-            <span className="list-emoji" aria-hidden>{r.emoji}</span>
+            <span className="list-emoji" aria-hidden>
+              {r.emoji}
+            </span>
             <span className="list-main">
               <strong>{r.title}</strong>
               <span className="muted small">
                 {CATEGORY_LABELS[r.category]} · {r.steps.length} steps ·{' '}
-                {r.assignedTo.map((id) => data.learners.find((l) => l.id === id)?.name).filter(Boolean).join(', ') || 'Not assigned'}
+                {r.assignedTo
+                  .map((id) => data.learners.find((l) => l.id === id)?.name)
+                  .filter(Boolean)
+                  .join(', ') || 'Not assigned'}
               </span>
             </span>
             <span aria-hidden>›</span>
@@ -37,7 +45,12 @@ export function RoutineList() {
 }
 
 const blankChoice = (correct = false): Choice => ({ id: newId('choice'), label: '', emoji: '', correct });
-const blankStep = (): Step => ({ id: newId('step'), instruction: '', emoji: '📍', choices: [blankChoice(true), blankChoice()] });
+const blankStep = (): Step => ({
+  id: newId('step'),
+  instruction: '',
+  emoji: '📍',
+  choices: [blankChoice(true), blankChoice()],
+});
 const blankRoutine = (): Routine => ({
   id: newId('routine'),
   title: '',
@@ -91,18 +104,47 @@ function StepEditor({
       <div className="step-editor-head">
         <h3>Step {index + 1}</h3>
         <div className="row tight">
-          <button type="button" className="secondary small-button" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Move step up">↑</button>
-          <button type="button" className="secondary small-button" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Move step down">↓</button>
-          <button type="button" className="danger small-button" onClick={onRemove} disabled={total === 1}>Remove</button>
+          <button
+            type="button"
+            className="secondary small-button"
+            onClick={() => onMove(-1)}
+            disabled={index === 0}
+            aria-label="Move step up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            className="secondary small-button"
+            onClick={() => onMove(1)}
+            disabled={index === total - 1}
+            aria-label="Move step down"
+          >
+            ↓
+          </button>
+          <button type="button" className="danger small-button" onClick={onRemove} disabled={total === 1}>
+            Remove
+          </button>
         </div>
       </div>
 
       <div className="step-editor-body">
         <div className="step-media-edit">
-          <MediaView mediaId={step.mediaId} kind={step.mediaKind} emoji={step.emoji || '📍'} alt={step.instruction} className="thumb" />
+          <MediaView
+            mediaId={step.mediaId}
+            kind={step.mediaKind}
+            emoji={step.emoji || '📍'}
+            alt={step.instruction}
+            className="thumb"
+          />
           <label className="button secondary upload">
             {step.mediaId ? 'Replace photo/video' : 'Add photo/video'}
-            <input type="file" accept="image/*,video/*" hidden onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+            <input
+              type="file"
+              accept="image/*,video/*"
+              hidden
+              onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
+            />
           </label>
           {step.mediaId && (
             <button
@@ -122,7 +164,12 @@ function StepEditor({
         <div className="step-fields">
           <label className="field">
             What the learner does
-            <input value={step.instruction} onChange={(e) => onChange({ ...step, instruction: e.target.value })} placeholder="Put toothpaste on the brush." required />
+            <input
+              value={step.instruction}
+              onChange={(e) => onChange({ ...step, instruction: e.target.value })}
+              placeholder="Put toothpaste on the brush."
+              required
+            />
           </label>
           <label className="field short">
             Emoji (shown when there's no photo)
@@ -140,8 +187,21 @@ function StepEditor({
                   onChange={() => setChoice(c.id, { correct: true })}
                   aria-label="This is the right choice"
                 />
-                <input className="emoji-input" value={c.emoji} onChange={(e) => setChoice(c.id, { emoji: e.target.value })} maxLength={4} aria-label="Choice emoji" placeholder="🙂" />
-                <input value={c.label} onChange={(e) => setChoice(c.id, { label: e.target.value })} placeholder={c.correct ? 'Right choice' : 'Other choice'} aria-label="Choice label" required />
+                <input
+                  className="emoji-input"
+                  value={c.emoji}
+                  onChange={(e) => setChoice(c.id, { emoji: e.target.value })}
+                  maxLength={4}
+                  aria-label="Choice emoji"
+                  placeholder="🙂"
+                />
+                <input
+                  value={c.label}
+                  onChange={(e) => setChoice(c.id, { label: e.target.value })}
+                  placeholder={c.correct ? 'Right choice' : 'Other choice'}
+                  aria-label="Choice label"
+                  required
+                />
                 <button
                   type="button"
                   className="link-button"
@@ -157,7 +217,11 @@ function StepEditor({
               </div>
             ))}
             {step.choices.length < 4 && (
-              <button type="button" className="link-button" onClick={() => onChange({ ...step, choices: [...step.choices, blankChoice()] })}>
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => onChange({ ...step, choices: [...step.choices, blankChoice()] })}
+              >
                 + Add choice
               </button>
             )}
@@ -174,10 +238,15 @@ export function RoutineEdit() {
   const { data, saveRoutine, deleteRoutine } = useStore();
   const existing = data.routines.find((r) => r.id === routineId);
   const [form, setForm] = useState<Routine>(existing ?? blankRoutine());
+  const [errors, setErrors] = useState<string[]>([]);
   const isNew = !existing;
 
   const set = <K extends keyof Routine>(key: K, value: Routine[K]) => setForm((f) => ({ ...f, [key]: value }));
-  const setStep = (i: number, s: Step) => set('steps', form.steps.map((x, j) => (j === i ? s : x)));
+  const setStep = (i: number, s: Step) =>
+    set(
+      'steps',
+      form.steps.map((x, j) => (j === i ? s : x)),
+    );
   const moveStep = (i: number, delta: number) => {
     const steps = [...form.steps];
     [steps[i], steps[i + delta]] = [steps[i + delta], steps[i]];
@@ -185,13 +254,17 @@ export function RoutineEdit() {
   };
 
   const save = (then: string) => {
-    saveRoutine({ ...form, title: form.title.trim() || 'Untitled routine' });
+    const problems = validateRoutine(form);
+    setErrors(problems);
+    if (problems.length) return;
+    saveRoutine(form);
     navigate(then);
   };
 
   return (
     <form
       className="form"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
         save('/admin/routines');
@@ -204,7 +277,13 @@ export function RoutineEdit() {
         <div className="field-row">
           <label className="field grow">
             Name
-            <input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="Take the bus to school" required autoFocus={isNew} />
+            <input
+              value={form.title}
+              onChange={(e) => set('title', e.target.value)}
+              placeholder="Take the bus to school"
+              required
+              autoFocus={isNew}
+            />
           </label>
           <label className="field short">
             Emoji
@@ -214,7 +293,9 @@ export function RoutineEdit() {
             Type
             <select value={form.category} onChange={(e) => set('category', e.target.value as RoutineCategory)}>
               {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>
+                  {label}
+                </option>
               ))}
             </select>
           </label>
@@ -222,7 +303,12 @@ export function RoutineEdit() {
         <div className="field-row">
           <label className="field grow">
             “Then” reward (First this routine, then…)
-            <input value={form.thenReward} onChange={(e) => set('thenReward', e.target.value)} placeholder="Tablet time" required />
+            <input
+              value={form.thenReward}
+              onChange={(e) => set('thenReward', e.target.value)}
+              placeholder="Tablet time"
+              required
+            />
           </label>
           <label className="field short">
             Reward emoji
@@ -238,7 +324,10 @@ export function RoutineEdit() {
                   type="checkbox"
                   checked={form.assignedTo.includes(l.id)}
                   onChange={(e) =>
-                    set('assignedTo', e.target.checked ? [...form.assignedTo, l.id] : form.assignedTo.filter((a) => a !== l.id))
+                    set(
+                      'assignedTo',
+                      e.target.checked ? [...form.assignedTo, l.id] : form.assignedTo.filter((a) => a !== l.id),
+                    )
                   }
                 />
                 {l.avatar} {l.name}
@@ -250,8 +339,8 @@ export function RoutineEdit() {
 
       <h2>Steps</h2>
       <p className="muted">
-        Take photos or short videos from the learner's point of view in the real place: their sink, their bus stop, their
-        classroom door.
+        Take photos or short videos from the learner's point of view in the real place: their sink, their bus stop,
+        their classroom door.
       </p>
       <ol className="step-editors">
         {form.steps.map((s, i) => (
@@ -262,7 +351,12 @@ export function RoutineEdit() {
             total={form.steps.length}
             onChange={(next) => setStep(i, next)}
             onMove={(d) => moveStep(i, d)}
-            onRemove={() => set('steps', form.steps.filter((x) => x.id !== s.id))}
+            onRemove={() =>
+              set(
+                'steps',
+                form.steps.filter((x) => x.id !== s.id),
+              )
+            }
           />
         ))}
       </ol>
@@ -270,14 +364,31 @@ export function RoutineEdit() {
         + Add step
       </button>
 
+      {errors.length > 0 && (
+        <div className="card error-box" role="alert">
+          <strong>Fix these before saving:</strong>
+          <ul>
+            {errors.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="row sticky-actions">
         <button type="submit">Save routine</button>
         {form.assignedTo[0] && (
-          <button type="button" className="secondary" onClick={() => save(`/learn/${form.assignedTo[0]}/play/${form.id}`)}>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => save(`/learn/${form.assignedTo[0]}/play/${form.id}`)}
+          >
             Save and try it
           </button>
         )}
-        <Link className="button secondary" to="/admin/routines">Cancel</Link>
+        <Link className="button secondary" to="/admin/routines">
+          Cancel
+        </Link>
         {!isNew && (
           <button
             type="button"

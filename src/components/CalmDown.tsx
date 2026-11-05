@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { startCalmMusic } from '../lib/audio';
-import type { CalmTool } from '../lib/types';
+import { startCalmMusic } from '../services/audio';
+import type { CalmTool } from '../domain/types';
 
 interface Props {
   tools: CalmTool[];
@@ -23,7 +23,10 @@ const BREATH_PHASES = [
 function BreathingPacer() {
   const [phase, setPhase] = useState(0);
   useEffect(() => {
-    const t = window.setTimeout(() => setPhase((p) => (p + 1) % BREATH_PHASES.length), BREATH_PHASES[phase].seconds * 1000);
+    const t = window.setTimeout(
+      () => setPhase((p) => (p + 1) % BREATH_PHASES.length),
+      BREATH_PHASES[phase].seconds * 1000,
+    );
     return () => window.clearTimeout(t);
   }, [phase]);
   const current = BREATH_PHASES[phase];
@@ -34,7 +37,9 @@ function BreathingPacer() {
         style={{ ['--phase-s' as string]: `${current.seconds}s` }}
         aria-hidden
       />
-      <p className="calm-caption" aria-live="polite">{current.text}</p>
+      <p className="calm-caption" aria-live="polite">
+        {current.text}
+      </p>
     </div>
   );
 }

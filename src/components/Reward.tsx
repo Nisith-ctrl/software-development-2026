@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { playChime } from '../lib/audio';
-import type { Learner } from '../lib/types';
+import { playChime } from '../services/audio';
+import type { Learner } from '../domain/types';
 
 export function TokenBoard({ filled, total }: { filled: number; total: number }) {
   return (
@@ -38,7 +38,10 @@ export function StepReward({ learner, tokens }: { learner: Learner; tokens: numb
       {learner.rewardStyle === 'interest' && <InterestFloat emoji={learner.interestEmoji} />}
       <p className="step-reward-text">Nice work!</p>
       {learner.rewardStyle === 'tokens' && (
-        <TokenBoard filled={tokens % learner.tokensPerReward || learner.tokensPerReward} total={learner.tokensPerReward} />
+        <TokenBoard
+          filled={tokens % learner.tokensPerReward || learner.tokensPerReward}
+          total={learner.tokensPerReward}
+        />
       )}
     </div>
   );

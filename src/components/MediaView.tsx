@@ -1,4 +1,4 @@
-import { useMediaUrl } from '../lib/store';
+import { useMediaUrl } from '../state/store';
 
 interface Props {
   mediaId?: string;

@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { HoldButton } from '../components/HoldButton';
 import { TokenBoard } from '../components/Reward';
-import { useStore } from '../lib/store';
+import { useStore } from '../state/store';
 
 export function LearnerHome() {
   const { learnerId } = useParams();
@@ -39,7 +39,9 @@ export function LearnerHome() {
       <div className="routine-tiles">
         {routines.map((r) => (
           <Link key={r.id} to={`/learn/${learner.id}/play/${r.id}`} className="routine-tile">
-            <span className="routine-emoji" aria-hidden>{r.emoji}</span>
+            <span className="routine-emoji" aria-hidden>
+              {r.emoji}
+            </span>
             <span className="routine-title">{r.title}</span>
             <span className="routine-steps">{r.steps.length} steps</span>
           </Link>

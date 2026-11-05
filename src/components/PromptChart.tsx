@@ -1,4 +1,4 @@
-import { PROMPT_LABELS, type PromptLevel } from '../lib/types';
+import { PROMPT_LABELS, type PromptLevel } from '../domain/types';
 
 interface Point {
   at: number;
@@ -33,7 +33,9 @@ export function PromptChart({ points, title }: { points: Point[]; title: string 
         {([0, 1, 2, 3] as PromptLevel[]).map((l) => (
           <g key={l}>
             <line x1={PAD.left} x2={W - PAD.right} y1={y(l)} y2={y(l)} className="chart-grid" />
-            <text x={PAD.left - 8} y={y(l) + 4} textAnchor="end" className="chart-label">{PROMPT_LABELS[l]}</text>
+            <text x={PAD.left - 8} y={y(l) + 4} textAnchor="end" className="chart-label">
+              {PROMPT_LABELS[l]}
+            </text>
           </g>
         ))}
         <path d={path} className="chart-line" />
@@ -42,9 +44,13 @@ export function PromptChart({ points, title }: { points: Point[]; title: string 
             <title>{`${fmt(p.at)}: ${p.level.toFixed(1)}`}</title>
           </circle>
         ))}
-        <text x={x(0)} y={H - 6} textAnchor={points.length === 1 ? 'middle' : 'start'} className="chart-label">{fmt(first.at)}</text>
+        <text x={x(0)} y={H - 6} textAnchor={points.length === 1 ? 'middle' : 'start'} className="chart-label">
+          {fmt(first.at)}
+        </text>
         {points.length > 1 && (
-          <text x={x(points.length - 1)} y={H - 6} textAnchor="end" className="chart-label">{fmt(last.at)}</text>
+          <text x={x(points.length - 1)} y={H - 6} textAnchor="end" className="chart-label">
+            {fmt(last.at)}
+          </text>
         )}
       </svg>
     </figure>

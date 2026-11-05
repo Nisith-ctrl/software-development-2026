@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { parseHeartRate } from '../domain/heartRate';
 
 // Web Bluetooth isn't in TypeScript's DOM lib; this is the slice we use.
 interface BtCharacteristic extends EventTarget {
@@ -8,7 +9,9 @@ interface BtCharacteristic extends EventTarget {
 interface BtDevice extends EventTarget {
   name?: string;
   gatt?: {
-    connect(): Promise<{ getPrimaryService(s: string): Promise<{ getCharacteristic(c: string): Promise<BtCharacteristic> }> }>;
+    connect(): Promise<{
+      getPrimaryService(s: string): Promise<{ getCharacteristic(c: string): Promise<BtCharacteristic> }>;
+    }>;
     disconnect(): void;
   };
 }
@@ -32,12 +35,6 @@ interface HeartRate {
 }
 
 const HeartRateContext = createContext<HeartRate | null>(null);
-
-/** Parses the standard Heart Rate Measurement characteristic (0x2A37). */
-export function parseHeartRate(view: DataView): number {
-  const flags = view.getUint8(0);
-  return flags & 0x01 ? view.getUint16(1, true) : view.getUint8(1);
-}
 
 export function HeartRateProvider({ children }: { children: ReactNode }) {
   const [bpm, setBpm] = useState<number | null>(null);

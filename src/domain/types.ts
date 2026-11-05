@@ -95,19 +95,44 @@ export interface Session {
   calmEvents: CalmEvent[];
 }
 
+export type RealWorldResult = 'independent' | 'with-help' | 'not-yet';
+
+export const REAL_WORLD_LABELS: Record<RealWorldResult, string> = {
+  independent: 'Did it on their own',
+  'with-help': 'Did it with help',
+  'not-yet': 'Not yet',
+};
+
+/**
+ * A grown-up's note of how the learner did the routine in the real place.
+ * Comparing these with in-app progress is how LifeSync measures the generalization gap.
+ */
+export interface RealWorldCheck {
+  id: string;
+  learnerId: string;
+  routineId: string;
+  at: number;
+  place: string;
+  result: RealWorldResult;
+  note: string;
+}
+
 export interface PromptState {
   level: PromptLevel;
   /** Clean completions in a row at the current level. */
   streak: number;
 }
 
+export const DATA_VERSION = 2;
+
 export interface AppData {
-  version: 1;
+  version: typeof DATA_VERSION;
   learners: Learner[];
   routines: Routine[];
   sessions: Session[];
   /** Keyed by `${learnerId}:${stepId}`. */
   prompts: Record<string, PromptState>;
+  realWorldChecks: RealWorldCheck[];
 }
 
 export const promptKey = (learnerId: string, stepId: string) => `${learnerId}:${stepId}`;

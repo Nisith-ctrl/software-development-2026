@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { HeartRateProvider } from './lib/heartRate';
-import { StoreProvider } from './lib/store';
+import { HeartRateProvider } from './services/heartRate';
+import { StoreProvider } from './state/store';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { Dashboard } from './pages/admin/Dashboard';
 import { LearnerEdit, LearnerList } from './pages/admin/Learners';
@@ -15,7 +15,7 @@ export function App() {
   return (
     <StoreProvider>
       <HeartRateProvider>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/learn/:learnerId" element={<LearnerHome />} />

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { useHeartRate } from '../../lib/heartRate';
+import { useHeartRate } from '../../services/heartRate';
 
 export function AdminLayout() {
   const hr = useHeartRate();
@@ -11,7 +11,9 @@ export function AdminLayout() {
           <span>LifeSync</span>
         </NavLink>
         <nav className="admin-nav" aria-label="Grown-up area">
-          <NavLink to="/admin" end>Overview</NavLink>
+          <NavLink to="/admin" end>
+            Overview
+          </NavLink>
           <NavLink to="/admin/routines">Routines</NavLink>
           <NavLink to="/admin/learners">Learners</NavLink>
           <NavLink to="/admin/data">Progress data</NavLink>

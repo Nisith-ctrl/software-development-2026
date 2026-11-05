@@ -1,6 +1,6 @@
 import { nextPromptState } from './adaptive';
-import type { AppData, Choice, Learner, PromptLevel, Routine, Session, Step } from './types';
-import { promptKey } from './types';
+import type { AppData, Choice, Learner, PromptLevel, RealWorldCheck, Routine, Session, Step } from './types';
+import { DATA_VERSION, promptKey } from './types';
 
 const c = (id: string, label: string, emoji: string, correct = false): Choice => ({ id, label, emoji, correct });
 
@@ -51,10 +51,7 @@ const brushTeeth: Routine = {
   assignedTo: [sam.id, maya.id],
   updatedAt: 0,
   steps: [
-    step('teeth_1', 'Go to the bathroom sink.', '🚰', [
-      c('a', 'Bathroom sink', '🚰', true),
-      c('b', 'Kitchen', '🍳'),
-    ]),
+    step('teeth_1', 'Go to the bathroom sink.', '🚰', [c('a', 'Bathroom sink', '🚰', true), c('b', 'Kitchen', '🍳')]),
     step('teeth_2', 'Put a small dot of toothpaste on the brush.', '🪥', [
       c('a', 'Toothpaste', '🧴', true),
       c('b', 'Soap', '🧼'),
@@ -101,10 +98,7 @@ const grocery: Routine = {
       c('a', 'Items on the belt', '🧺', true),
       c('b', 'Keep items in the cart', '🛒'),
     ]),
-    step('shop_4', 'Say "Hi" to the cashier.', '👋', [
-      c('a', '"Hi!"', '👋', true),
-      c('b', 'Look away', '🙈'),
-    ]),
+    step('shop_4', 'Say "Hi" to the cashier.', '👋', [c('a', '"Hi!"', '👋', true), c('b', 'Look away', '🙈')]),
     step('shop_5', 'Tap your card on the reader when the screen says so.', '💳', [
       c('a', 'Tap the card', '💳', true),
       c('b', 'Put card away', '👛'),
@@ -161,9 +155,18 @@ function demoHistory(learner: Learner, routines: Routine[], now: number) {
   };
 
   const plan: Array<[Routine, number]> = [
-    [routines[0], 13], [routines[2], 12], [routines[0], 11], [routines[1], 10],
-    [routines[0], 9], [routines[2], 8], [routines[0], 7], [routines[1], 6],
-    [routines[0], 5], [routines[2], 4], [routines[1], 3], [routines[0], 2],
+    [routines[0], 13],
+    [routines[2], 12],
+    [routines[0], 11],
+    [routines[1], 10],
+    [routines[0], 9],
+    [routines[2], 8],
+    [routines[0], 7],
+    [routines[1], 6],
+    [routines[0], 5],
+    [routines[2], 4],
+    [routines[1], 3],
+    [routines[0], 2],
     [routines[1], 1],
   ];
 
@@ -181,10 +184,23 @@ function demoHistory(learner: Learner, routines: Routine[], now: number) {
       t += durationMs;
       if (calmDuringStep) {
         const calmMs = 45000 + Math.round(rand() * 30000);
-        calmEvents.push({ at: t, stepId: s.id, trigger: 'heart-rate', hr: 118 + Math.round(rand() * 10), durationMs: calmMs });
+        calmEvents.push({
+          at: t,
+          stepId: s.id,
+          trigger: 'heart-rate',
+          hr: 118 + Math.round(rand() * 10),
+          durationMs: calmMs,
+        });
         t += calmMs;
       }
-      const log = { stepId: s.id, promptLevel: level, wrongTaps, durationMs, calmDuringStep, peakHr: 84 + Math.round(rand() * 20) };
+      const log = {
+        stepId: s.id,
+        promptLevel: level,
+        wrongTaps,
+        durationMs,
+        calmDuringStep,
+        peakHr: 84 + Math.round(rand() * 20),
+      };
       prompts[key] = nextPromptState(prompts[key], log);
       return log;
     });
@@ -203,14 +219,45 @@ function demoHistory(learner: Learner, routines: Routine[], now: number) {
   return { sessions, prompts };
 }
 
+/**
+ * Real-world tries logged by Sam's team. Tooth-brushing shows the generalization
+ * gap (fine in the app, still needs help at home); the greeting is starting to transfer.
+ */
+function demoChecks(now: number): RealWorldCheck[] {
+  const check = (
+    id: string,
+    routineId: string,
+    daysAgo: number,
+    place: string,
+    result: RealWorldCheck['result'],
+    note: string,
+  ) => ({
+    id: `check_demo_${id}`,
+    learnerId: sam.id,
+    routineId,
+    at: now - daysAgo * DAY,
+    place,
+    result,
+    note,
+  });
+  return [
+    check('1', brushTeeth.id, 6, 'Home bathroom', 'not-yet', 'Upset by the noise of the extractor fan.'),
+    check('2', brushTeeth.id, 3, 'Home bathroom', 'with-help', 'Needed a reminder to rinse.'),
+    check('3', brushTeeth.id, 1, 'Home bathroom', 'with-help', 'Skipped the bottom teeth.'),
+    check('4', greeting.id, 4, 'School hallway', 'with-help', 'Waved, but did not say hi.'),
+    check('5', greeting.id, 1, 'School hallway', 'independent', 'Said "Hi, Jordan!" without a prompt.'),
+  ];
+}
+
 export function createSeedData(now = Date.now()): AppData {
   const routines = [brushTeeth, grocery, greeting].map((r) => ({ ...r, updatedAt: now }));
   const { sessions, prompts } = demoHistory(sam, routines, now);
   return {
-    version: 1,
+    version: DATA_VERSION,
     learners: [sam, maya],
     routines,
     sessions,
     prompts,
+    realWorldChecks: demoChecks(now),
   };
 }

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LifeSync – Tier 1 Requirements and Design Note</title>
+<style>
+  @page { size: letter; margin: 0.45in 0.55in; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.33; color: #222; margin: 0; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #3e7c76; padding-bottom: 6px; margin-bottom: 9px; }
+  h1 { font-size: 17pt; margin: 0; color: #2a5f5a; }
+  .sub { font-size: 9.5pt; color: #555; margin-top: 2px; }
+  .meta { text-align: right; font-size: 8.8pt; color: #444; line-height: 1.45; }
+  h2 { font-size: 10.8pt; color: #2a5f5a; margin: 7px 0 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  p { margin: 0 0 5px; }
+  ul { margin: 0 0 4px; padding-left: 16px; }
+  li { margin-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.4pt; }
+  th, td { border: 1px solid #c9c2b4; padding: 2px 5px; text-align: left; vertical-align: top; }
+  th { background: #e6f0ee; }
+  .done { color: #2a5f5a; font-weight: 700; white-space: nowrap; }
+  .next { color: #8a5a10; font-weight: 700; white-space: nowrap; }
+  .theme { background: #f3efe6; border-left: 3px solid #c98a1e; padding: 5px 9px; margin: 4px 0 6px; font-style: italic; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  footer { margin-top: 8px; font-size: 8.4pt; color: #555; border-top: 1px solid #ccc; padding-top: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>LifeSync</h1>
+    <div class="sub">Bridging the generalization gap in autism skills education</div>
+  </div>
+  <div class="meta">
+    TSA High School Software Development · Tier 1<br />
+    Team ID: ________ · November 2026<br />
+    github.com/Nisith-ctrl/software-development-2026
+  </div>
+</header>
+
+<h2>Problem</h2>
+<p>
+  Learners on the autism spectrum often master a life skill in a structured classroom or clinic, then can't
+  carry it out in the real place: a loud supermarket, a crowded bus, their own bathroom. This is the
+  <b>generalization gap</b>. Learning apps tend to widen it. They teach with cartoons that look nothing like
+  the learner's world, they mark mistakes in ways that raise anxiety, they ignore sensory overload, and they
+  stop at "lesson complete" without checking whether the skill works in real life.
+</p>
+
+<h2>Connection to the theme</h2>
+<div class="theme">"Develop a software application that improves how people learn, teach, practice, or develop new skills…
+  an engaging, effective, and user-centered software solution."</div>
+<ul>
+  <li><b>Learn and practice:</b> learners rehearse routines step by step inside photos and videos of <i>their own</i> places, with errorless prompting so practice never ends in failure.</li>
+  <li><b>Teach:</b> teachers, therapists and parents build routines without code and see exactly which step each learner gets stuck on.</li>
+  <li><b>Develop new skills:</b> help fades as the learner improves, and real-world check-ins confirm the skill transferred. That transfer is the real goal of practising.</li>
+  <li><b>User-centred:</b> tap-only input, calm colours, read-aloud, rewards built on each learner's interests, and a calm-down mode triggered by heart rate.</li>
+</ul>
+<p><b>What's original:</b> LifeSync <i>measures</i> the generalization gap. For each routine it compares in-app mastery with
+  logged real-world tries and flags "mastered in the app, not yet in real life", so the team knows where to practise next.</p>
+
+<h2>Feature list</h2>
+<table>
+  <tr><th style="width:27%">Feature</th><th>What it does</th><th style="width:11%">Status</th></tr>
+  <tr><td>"My World" routine builder</td><td>Steps with photos or videos of the learner's real environment, tap choices with one right answer, a First/Then reward, and plain-language validation.</td><td class="done">Built</td></tr>
+  <tr><td>Errorless learning player</td><td>Four prompt levels (Full, Highlight, Delayed, Independent). An off-target tap fades and the right choice is shown, never an error. First/Then board, Now/Next strip, read-aloud.</td><td class="done">Built</td></tr>
+  <tr><td>Personal reinforcement</td><td>Token board, special-interest animation or soft chime, chosen per learner.</td><td class="done">Built</td></tr>
+  <tr><td>Bio-responsive calm-down</td><td>A Bluetooth heart-rate device (or simulator) is watched during practice. Sustained high heart rate pauses the routine and opens a dark calm screen: breathing pacer, deep-pressure visual, calm music.</td><td class="done">Built</td></tr>
+  <tr><td>Adaptive prompting</td><td>Help fades after two clean completions and returns after repeated redirects or a calm break.</td><td class="done">Built</td></tr>
+  <tr><td>Real-world check-ins</td><td>Grown-ups log real tries. Each routine is labelled Practising, Generalization gap, Transferring or Generalized.</td><td class="done">Built</td></tr>
+  <tr><td>IEP dashboard</td><td>Sticking points, help level per step, help-over-time chart, CSV export, print view.</td><td class="done">Built</td></tr>
+  <tr><td>Photo hotspots</td><td>"Tap the toothbrush in the picture" in place of buttons.</td><td class="next">Tier 2</td></tr>
+  <tr><td>In-place practice mode</td><td>Phone mode that runs the routine during the real task.</td><td class="next">Tier 2</td></tr>
+  <tr><td>Learned prompting model</td><td>Replaces the fixed fading rules using session data.</td><td class="next">Later</td></tr>
+  <tr><td>Accounts and sync</td><td>Parent, teacher and therapist roles across devices; watch companion app.</td><td class="next">Later</td></tr>
+</table>
+
+<div class="cols">
+  <div>
+    <h2>Design</h2>
+    <ul>
+      <li>Browser app (React + TypeScript), no install, works offline; data stays on the device (IndexedDB).</li>
+      <li>Layered code: a pure <b>domain</b> layer holds every rule (session state machine, prompt fading, calm-down trigger, generalization metric); UI and browser services sit on top.</li>
+      <li>Grounded in established methods: video modelling, errorless learning, most-to-least prompting.</li>
+    </ul>
+  </div>
+  <div>
+    <h2>Development practices</h2>
+    <ul>
+      <li><b>Requirements:</b> numbered requirements, each traced to code and tests (docs/REQUIREMENTS.md).</li>
+      <li><b>Design:</b> architecture, data model and state diagrams (docs/DESIGN.md).</li>
+      <li><b>Testing:</b> 62 automated unit and integration tests, 93% domain coverage, manual test plan; CI runs type check, lint, tests and build on every push.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>Run it: <code>npm install</code> then <code>npm run dev</code>. Demo data is included, so every feature can be shown right away.</footer>
+</body>
+</html>

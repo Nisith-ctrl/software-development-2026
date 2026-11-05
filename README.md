@@ -1,11 +1,24 @@
 # LifeSync
 
-A web app that helps learners on the autism spectrum practise real-life routines in a digital copy of
-their own world. Caregivers and educators build routines from photos and videos of the learner's real
-places, the learner taps through them with errorless prompting, a heart-rate wearable can pause the
-routine for a calm-down break, and the teaching team gets progress data for IEP meetings.
+**TSA High School Software Development, 2026–27.** Theme: _improve how people learn, teach,
+practice, or develop new skills._
 
-See [PLAN.md](PLAN.md) for the build plan and roadmap.
+LifeSync helps learners on the autism spectrum close the **generalization gap**: the distance
+between doing a skill in a classroom and doing it in the real, noisy world. Grown-ups build
+routines from photos and videos of the learner's own places. The learner practises them with
+errorless prompting that fades as they improve. A heart-rate wearable can pause practice for a
+calm-down break. Then real-world check-ins show whether the skill actually transferred.
+
+## Project documents
+
+| Document                                               | Contents                                                                        |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| [Requirements](docs/REQUIREMENTS.md)                   | Problem, theme alignment, users, numbered requirements traced to code and tests |
+| [Design](docs/DESIGN.md)                               | Architecture, data model, session state machine, algorithms, design decisions   |
+| [Testing](docs/TESTING.md)                             | Test strategy, automated results, manual test cases                             |
+| [Requirements and design note (PDF)](docs/submission/) | One-page Tier 1 note                                                            |
+| [Demo script](docs/DEMO-SCRIPT.md)                     | Script for the screen recording                                                 |
+| [Plan](PLAN.md)                                        | Build history and roadmap                                                       |
 
 ## Run it
 
@@ -17,44 +30,46 @@ npm run dev
 ```
 
 Open http://localhost:5173. The app starts with demo data: two learners (Sam and Maya), three
-routines and two weeks of Sam's practice history, so the dashboard has something to show.
+routines, two weeks of Sam's practice history and some real-world check-ins.
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Dev server with hot reload |
-| `npm test` | Unit tests (adaptive prompting rules) |
-| `npm run build` | Type check and production build into `dist/` |
+| Command                 | What it does                                          |
+| ----------------------- | ----------------------------------------------------- |
+| `npm run dev`           | Dev server with hot reload                            |
+| `npm test`              | All unit and integration tests                        |
+| `npm run test:coverage` | Tests with a coverage report                          |
+| `npm run check`         | Type check, lint, format check and tests (same as CI) |
+| `npm run build`         | Production build into `dist/`                         |
 
-## Try the main features
+## Features
 
-1. **Grown-ups → Wearable → Use simulator** to fake a heart-rate feed (or connect a Bluetooth
-   heart-rate strap in Chrome or Edge).
-2. Go back to the start screen, tap **Sam**, then **Pay at the grocery store**.
-3. Tap a choice other than the right one: it fades and the right one gets an outline. No error
-   message, which is how errorless learning works.
-4. Open the **♥** button in the bottom-left corner and press **Spike**. After a few seconds above
-   the threshold, the routine pauses and the calm screen opens.
-5. Finish the routine, then open **Grown-ups → Progress data** to see the session, the calm break,
-   sticking points and the help level for each step. **Export CSV** gives one row per step attempt.
-6. **Grown-ups → Routines** to edit a routine and add your own photos or videos to each step.
+1. **"My World" routine builder**: steps with photos or videos of the learner's real places,
+   tap choices, a First/Then reward, and validation that explains what to fix.
+2. **Errorless learning player**: four prompt levels (Full, Highlight, Delayed, Independent).
+   An off-target tap is never marked wrong; the right choice is shown instead.
+3. **Bio-responsive calm-down**: Bluetooth heart-rate device or simulator. Sustained high heart
+   rate pauses the routine and opens a dark calm screen with breathing, pressure and music tools.
+4. **Adaptive prompting**: help fades after two clean completions and comes back when the
+   learner struggles.
+5. **Real-world check-ins**: grown-ups log how the learner did in the real place. Each routine
+   is labelled Practising, Generalization gap, Transferring or Generalized.
+6. **IEP dashboard**: sticking points, help per step, help over time, CSV export, print view.
 
-## How it works
-
-- **Storage**: everything lives in the browser's IndexedDB (`src/lib/db.ts`), including uploaded
-  media. There is no server yet, so data stays on the device. Use **Overview → Download backup**
-  to move it.
-- **Prompt levels**: Full (only the right choice can be tapped) → Highlight → Delayed (hint after
-  5 s) → Independent. `src/lib/adaptive.ts` fades help after two clean completions and adds help
-  back after repeated redirects or a calm break.
-- **Heart rate**: `src/lib/heartRate.tsx` reads the standard Bluetooth Heart Rate profile or runs
-  a simulator. Each learner has their own threshold, hold time and minimum break length.
-
-## Project layout
+## Code structure
 
 ```
 src/
-  lib/          data model, storage, adaptive rules, audio, heart rate, export
-  components/   calm-down screen, rewards, media, chart, hold-to-exit button
-  pages/        learner screens (Home, LearnerHome, Player)
-  pages/admin/  grown-up screens (routines, learners, dashboard, wearable)
+  domain/       Pure TypeScript: rules and calculations, no React or browser APIs (unit tested)
+    session.ts      practice session state machine
+    adaptive.ts     prompt fading rules
+    stress.ts       when heart rate should open the calm screen
+    metrics.ts      dashboard numbers and the generalization gap
+    repository.ts   data operations and migration of old saves
+    validation.ts   routine and learner checks
+    csv.ts          IEP exports
+  services/     Browser APIs: IndexedDB, Web Bluetooth, Web Audio, downloads
+  state/        React store that applies domain operations and saves them
+  components/   Reusable UI (calm screen, rewards, chart, real-world panel)
+  pages/        Learner screens and the grown-up area (pages/admin)
 ```
+
+Data stays in the browser's IndexedDB. There is no server or account yet.
